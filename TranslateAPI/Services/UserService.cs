@@ -50,35 +50,42 @@ namespace TranslateAPI.Services
             manager.NumberOfRemainingCoin += 20000;
             return manager;
         }
-
-
-
-        public async Task<string> CreateUser(string Name,string Password)
+        private string CheckCreateUser(string Name,string Password0_1,string Password_02) 
         {
-            var manager = _DbConText.Managers.FirstOrDefault();
-            string IP = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName()).AddressList.GetValue(0).ToString();
-            string result = "đã tạo tài khoản thành công ! ";
-            var addressIp = _DbConText.Addresses.FirstOrDefault(x => x.AddressIP == IP);
+            return (String.Compare(Name, Password0_1, true) == 0) ? "tài khoản và mật khẩu không được giống nhau" : String.Compare(Password0_1, Password_02, true) == 0 ? "đã tạo tài khoản thành công!" : "mật khẩu phải giống nhau";
+        }
+
+
+
+        public async Task<string> CreateUser(string Name,string Password_01,string Password_02)
+        {
             if (_DbConText.Users.Any(x => x.UserName == Name)) { return "tài khoản đã tồn tại"; }
-            if (addressIp != null) 
+            string result = CheckCreateUser(Name, Password_01, Password_02);
+            if(result.Contains("đã tạo tài khoản thành công!")) 
             {
-                if (addressIp.Active == 0) { return $"ip : {IP} đã bị block : v"; }
+                var manager = _DbConText.Managers.FirstOrDefault();
+                string IP = System.Net.Dns.GetHostEntry(System.Net.Dns.GetHostName()).AddressList.GetValue(0).ToString();
+                var addressIp = _DbConText.Addresses.FirstOrDefault(x => x.AddressIP == IP);
+                if (addressIp != null)
+                {
+                    if (addressIp.Active == 0) { return $"ip : {IP} đã bị block : v"; }
+                    else
+                    {
+                        _DbConText.AddAsync(CreateUser(Name, Password_01, addressIp.AddressID));
+                        _DbConText.Addresses.Update(UpdateAddress(addressIp, 1));
+                        _DbConText.Managers.Update(UpdateManager(manager, 0));
+                        await _DbConText.SaveChangesAsync();
+                    }
+                }
                 else
                 {
-                    _DbConText.AddAsync(CreateUser(Name, Password, addressIp.AddressID));
-                    _DbConText.Addresses.Update(UpdateAddress(addressIp, 1));
-                    _DbConText.Managers.Update(UpdateManager(manager, 0));
+                    addressIp = CreateIP(IP);
+                    _DbConText.Addresses.Add(addressIp);
+                    _DbConText.SaveChanges();
+                    _DbConText.Add(CreateUser(Name, Password_01, addressIp.AddressID));
+                    _DbConText.Managers.Update(UpdateManager(manager, 1));
                     await _DbConText.SaveChangesAsync();
                 }
-            }
-            else
-            {
-                addressIp = CreateIP(IP);
-                _DbConText.Addresses.Add(addressIp);
-                _DbConText.SaveChanges();
-                _DbConText.Add(CreateUser(Name, Password, addressIp.AddressID));
-                _DbConText.Managers.Update(UpdateManager(manager, 1));
-                await _DbConText.SaveChangesAsync();
             }
             return result;
         }

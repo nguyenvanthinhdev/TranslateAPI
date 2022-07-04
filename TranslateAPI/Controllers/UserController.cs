@@ -12,8 +12,8 @@ namespace TranslateAPI.Controllers
         public UserController(IUser UserService) { _UserService = UserService; }
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser(string name, string password)
-            => Ok(await _UserService.CreateUser(name, password));
+        public async Task<IActionResult> CreateUser(string Name, string Password_01,string Password_02)
+            => Ok(await _UserService.CreateUser(Name, Password_01, Password_02));
 
         [HttpGet]
         public async Task<IActionResult> GetUser(int? UserID = null, string? Name = null)
