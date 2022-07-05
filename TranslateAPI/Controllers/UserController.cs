@@ -4,19 +4,37 @@ using TranslateAPI.InterFaces;
 
 namespace TranslateAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("")]
     [ApiController]
     public class UserController : ControllerBase
     {
-        private readonly IUser _UserService;
-        public UserController(IUser UserService) { _UserService = UserService; }
+        private readonly IUnitOfWork _UOW;
+        public UserController(IUnitOfWork UOW) { _UOW = UOW; }
+        [HttpGet]
+        [Route("api/GetUser")]
+        public async Task<IActionResult> GetUser(int? UserID = null, string? Name = null)
+            => Ok(await _UOW.user.GetUser(UserID, Name));
 
         [HttpPost]
-        public async Task<IActionResult> CreateUser(string Name, string Password_01,string Password_02)
-            => Ok(await _UserService.CreateUser(Name, Password_01, Password_02));
+        [Route("api/CreateUser")]
+        public async Task<IActionResult> CreateUser([FromQuery]Account account, [FromQuery]string Password)
+        {
+            var res = _UOW.user.CreateUser(account, Password);
+            await _UOW.SaveAsync();
+            return Ok(res);
+        }
+        [HttpPost]
+        [Route("api/login")]
+        public async Task<IActionResult> Login(Account account)
+            => Ok(await _UOW.user.Login(account));
 
-        [HttpGet]
-        public async Task<IActionResult> GetUser(int? UserID = null, string? Name = null)
-            => Ok(await _UserService.GetUser(UserID, Name));
+        [HttpPut]
+        [Route("api/ChangePass")]
+        public async Task<IActionResult> UpdatePassword([FromQuery] Account account, [FromQuery] string Password)
+        {
+            var res = _UOW.user.ChangerPassword(account, Password);
+            await _UOW.SaveAsync();
+            return Ok(res);
+        }
     }
 }

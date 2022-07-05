@@ -14,6 +14,7 @@ builder.Services.AddSwaggerGen();
 //
 builder.Services.AddTransient<IUser, UserService>();
 builder.Services.AddTransient<ITranslate, TranslateService>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddTransient<AppDbContext>();
 
 

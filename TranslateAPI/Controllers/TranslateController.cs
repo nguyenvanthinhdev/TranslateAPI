@@ -8,11 +8,16 @@ namespace TranslateAPI.Controllers
     [ApiController]
     public class TranslateController : ControllerBase
     {
-        private readonly ITranslate _translate;
-        public TranslateController(ITranslate translate) { _translate = translate; }
+        private readonly IUnitOfWork _UOW;
+        public TranslateController(IUnitOfWork UOW) { _UOW = UOW; }
 
-        //[HttpGet]
-        //public async Task<IActionResult> GetUser(int? UserID=null,string? Name = null)
-        //    => Ok(await _translate.GetUser(UserID));
+        [HttpGet]
+        public async Task<IActionResult> Translate([FromQuery]Account account,[FromQuery]TranslateGG translate)
+        {
+            var res = _UOW.translate.Translate(account, translate);
+            await _UOW.SaveAsync();
+            return Ok(res);
+        }
+
     }
 }
