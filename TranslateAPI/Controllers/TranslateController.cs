@@ -14,7 +14,7 @@ namespace TranslateAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> Translate([FromQuery]Account account,[FromQuery]TranslateGG translate)
         {
-            var res = _UOW.translate.Translate(account, translate);
+            var res = _UOW.translate.TranslateAPI(account, translate);
             await _UOW.SaveAsync();
             return Ok(res);
         }

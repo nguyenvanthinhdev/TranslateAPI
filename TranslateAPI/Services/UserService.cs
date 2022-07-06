@@ -1,4 +1,5 @@
-﻿using TranslateAPI.ConText;
+﻿using Microsoft.EntityFrameworkCore;
+using TranslateAPI.ConText;
 using TranslateAPI.Entities;
 using TranslateAPI.InterFaces;
 
@@ -57,7 +58,7 @@ namespace TranslateAPI.Services
         }
         private string CheckCreateUser(Account account,string Password) 
         {
-            return (String.Compare(account.UserName, account.PassWork, true) == 0) ? "tài khoản và mật khẩu không được giống nhau" : String.Compare(account.UserName, account.PassWork, true) == 0 ? "đã tạo tài khoản thành công!" : "mật khẩu phải giống nhau";
+            return (String.Compare(account.UserName, account.PassWork, true) == 0) ? "tài khoản và mật khẩu không được giống nhau" : String.Compare(account.PassWork, account.PassWork, true) == 0 ? "đã tạo tài khoản thành công!" : "mật khẩu phải giống nhau";
         }
 
         #endregion
@@ -87,10 +88,15 @@ namespace TranslateAPI.Services
             }
             return result;
         }
-        public async Task<string> Login(Account account) 
+        public async Task<IQueryable<User>> Login(Account account) 
         {
-            if(_DbConText.Users.Where(x => x.UserName == account.UserName).Any(x => x.password == account.PassWork)) { return "login thành công"; }
-            return "tai khoan hoac mat khau khong chinh sac";
+            if(!_DbConText.Users.Where(x => x.UserName == account.UserName).Any(x => x.password == account.PassWork)) 
+            {
+                throw new Exception("tai khoan sai");
+            }
+            var user = _DbConText.Users.FirstOrDefault(x=>x.UserName == account.UserName);
+            var res =  _DbConText.Users.Include(x => x.Translates).Where(x=>x.UserID == user.UserID).AsQueryable();
+            return res;
         }
         public async Task<string> ChangerPassword(Account account, string PassWork)
         {
@@ -109,13 +115,6 @@ namespace TranslateAPI.Services
                 _DbConText.SaveChanges();
             }
             return res;
-        }
-        public async Task<List<User>> GetUser(int? UserID = null, string? Name = null)
-        {
-            var Users = _DbConText.Users.ToList();
-            if (UserID.HasValue) { Users = _DbConText.Users.Where(x => x.UserID == UserID).ToList(); }
-            if (!string.IsNullOrEmpty(Name)) { Users = _DbConText.Users.Where(x => x.UserName == Name).ToList(); }
-            return Users;
         }
 
     }

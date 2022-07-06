@@ -52,9 +52,9 @@ namespace TranslateAPI.Services
                 TranslateCode = Createhashcode($"{userID}+{DateTime.Today.Hour.ToString()}"),
             };
         }
-        private void UpdateUser(User user) 
+        private void UpdateUser(User user,int coin) 
         {
-            user.Coin -= 1000;
+            user.Coin -= coin;
             user.NumberOfuses += 1;
             _DbConText.Users.Update(user);
             _DbConText.SaveChanges();
@@ -66,26 +66,47 @@ namespace TranslateAPI.Services
             _DbConText.Addresses.Update(adress);
             _DbConText.SaveChanges();
         }
-        private void UpdateManager() 
+        private void UpdateManager(int NumberOfUsedCoin) 
         {
             var Manager = _DbConText.Managers.FirstOrDefault();
             Manager.NumberOfUsesSystem += 1;
-            Manager.NumberOfUsedCoin += 1000;
-            Manager.NumberOfRemainingCoin -= 1000;
+            Manager.NumberOfUsedCoin += NumberOfUsedCoin;
+            Manager.NumberOfRemainingCoin -= NumberOfUsedCoin;
             _DbConText.Managers.Update(Manager);
             _DbConText.SaveChanges();
         }
         #endregion
 
-        public async Task<Translate> Translate(Account account,TranslateGG translate) 
+        public async Task<Translate> TranslateAPI(Account account,TranslateGG translate) 
         {
             if (!(_DbConText.Users.Where(x => x.UserName == account.UserName).Any(x => x.password == account.PassWork))){ throw new Exception("sai tài khoản"); }
             var acc = _DbConText.Users.FirstOrDefault(x => x.UserName == account.UserName);
-            UpdateUser(acc);
+            if(_DbConText.Addresses.Where(x=>x.AddressID == acc.AddressID).Any(x => x.Active == 0)){ throw new Exception("IP bị block"); }
+            if(acc.Active == 0) { throw new Exception("account bị block"); }
+            // type acc   1 = thường | 2 = CTV | 3 = Admin 
+            switch (acc.PypeUser)
+            {
+                case 1:
+                    UpdateUser(acc, 1000);
+                    UpdateManager(1000);
+                    break;
+                case 2:
+                    UpdateUser(acc, 700);
+                    UpdateManager(700);
+                    break;
+                case 3:
+                    UpdateUser(acc, 0);
+                    UpdateManager(0);
+                    break;
+                default:
+                    break;
+            }           
             UpdateAddressIP(acc.AddressID);
-            UpdateManager();
-            await _DbConText.SaveChangesAsync();
-            return await CreateTranslate(acc.UserID, translate);
+            Translate trans = await CreateTranslate(acc.UserID, translate);
+            _DbConText.Add(trans);
+            _DbConText.SaveChanges();
+
+            return trans;
         }
     }
 }

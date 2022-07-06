@@ -10,10 +10,6 @@ namespace TranslateAPI.Controllers
     {
         private readonly IUnitOfWork _UOW;
         public UserController(IUnitOfWork UOW) { _UOW = UOW; }
-        [HttpGet]
-        [Route("api/GetUser")]
-        public async Task<IActionResult> GetUser(int? UserID = null, string? Name = null)
-            => Ok(await _UOW.user.GetUser(UserID, Name));
 
         [HttpPost]
         [Route("api/CreateUser")]

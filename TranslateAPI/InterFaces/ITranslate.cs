@@ -4,6 +4,6 @@ namespace TranslateAPI.InterFaces
 {
     public interface ITranslate
     {
-        Task<Translate> Translate(Account account,TranslateGG translate);
+        Task<Translate> TranslateAPI(Account account,TranslateGG translate);
     }
 }
