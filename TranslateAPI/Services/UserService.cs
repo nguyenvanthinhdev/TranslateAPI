@@ -5,18 +5,13 @@ using TranslateAPI.InterFaces;
 
 namespace TranslateAPI.Services
 {
-    public class UserService : IUser
+    public class UserService :ServiceExtension, IUser
     {
-        #region private 
+
         private readonly AppDbContext _DbConText;
-        public UserService(AppDbContext DbConText) { _DbConText = DbConText; }
-        private void UpdateAddress(Address address) 
-        {
-            address.NumberOfUsers += 1;
-            _DbConText.Addresses.Update(address);
-            _DbConText.SaveChanges();
-            
-        }
+
+        public UserService(AppDbContext DbConText) : base(DbConText) { }
+        #region private 
         private Address CreateIP(Manager manager, string IP) 
         {
             manager.NumberIpSystem += 1;
@@ -81,7 +76,7 @@ namespace TranslateAPI.Services
                 else
                 {
                     _DbConText.Add(CreateUser(account, addressIp.AddressID));
-                    UpdateAddress(addressIp);
+                    UpdateAddress(addressIp.AddressID);
                     UpdateManager(manager, 0);
                     _DbConText.SaveChanges();
                 }

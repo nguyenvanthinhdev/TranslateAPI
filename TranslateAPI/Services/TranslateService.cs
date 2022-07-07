@@ -7,13 +7,10 @@ using HttpRequest = xNet.HttpRequest;
 using SHA1Managed = System.Security.Cryptography.SHA1Managed;
 namespace TranslateAPI.Services
 {
-    public class TranslateService : ITranslate
+    public class TranslateService :ServiceExtension, ITranslate
     {
         private readonly AppDbContext _DbConText;
-        public TranslateService(AppDbContext DbConText)
-        {
-            _DbConText = DbConText;
-        }
+        public TranslateService(AppDbContext DbConText) : base(DbConText) { }
         #region private
 
         private string Createhashcode(string text)
@@ -38,7 +35,6 @@ namespace TranslateAPI.Services
             string[] res = regex.Match(html).ToString().Split("\"");
             return res[1];
         }
-
         private async Task<Translate> CreateTranslate(int userID,TranslateGG translate) 
         {
             return new Translate()
@@ -57,13 +53,6 @@ namespace TranslateAPI.Services
             user.Coin -= coin;
             user.NumberOfuses += 1;
             _DbConText.Users.Update(user);
-            _DbConText.SaveChanges();
-        }
-        private void UpdateAddressIP(int IDIP) 
-        {
-            var adress = _DbConText.Addresses.FirstOrDefault(x => x.AddressID == IDIP);
-            adress.NumberOfUses += 1;
-            _DbConText.Addresses.Update(adress);
             _DbConText.SaveChanges();
         }
         private void UpdateManager(int NumberOfUsedCoin) 
@@ -101,7 +90,7 @@ namespace TranslateAPI.Services
                 default:
                     break;
             }           
-            UpdateAddressIP(acc.AddressID);
+            UpdateAddress(acc.AddressID);
             Translate trans = await CreateTranslate(acc.UserID, translate);
             _DbConText.Add(trans);
             _DbConText.SaveChanges();

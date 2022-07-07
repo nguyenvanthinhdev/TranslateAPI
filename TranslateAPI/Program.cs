@@ -1,4 +1,6 @@
-﻿using TranslateAPI.ConText;
+﻿using FluentValidation.AspNetCore;
+using System.Reflection;
+using TranslateAPI.ConText;
 using TranslateAPI.InterFaces;
 using TranslateAPI.Services;
 
@@ -6,7 +8,9 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers()
+    .AddFluentValidation(c=>
+    c.RegisterValidatorsFromAssembly(Assembly.GetExecutingAssembly()));
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

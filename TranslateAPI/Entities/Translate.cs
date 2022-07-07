@@ -1,4 +1,6 @@
-﻿namespace TranslateAPI.Entities
+﻿using System.ComponentModel.DataAnnotations.Schema;
+
+namespace TranslateAPI.Entities
 {
     public class Translate
     {
@@ -9,6 +11,7 @@
         public string Input { get; set; }
         public string? Result { get; set; }
         public string? TranslateCode { get; set; }
+        [Column(TypeName ="date")]
         public DateTime? TimeTranslates { get; set; }
         public virtual User? User { get; set; }
     }

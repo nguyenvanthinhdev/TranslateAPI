@@ -9,7 +9,7 @@ namespace TranslateAPI.Services
     {
         private readonly AppDbContext _DbConText;
         public ManagerService(AppDbContext dbContext) { _DbConText = dbContext; }
-
+        #region private
         private string UpdateUser(int? id = null,string? name = null, int? acctive=null)
         {
             User user = null;
@@ -43,6 +43,36 @@ namespace TranslateAPI.Services
             return $"đã update {res}";
         }
 
+        private string Add_or_Minus_Coin(string name,int coin,int Add_or_Minus) 
+        {
+            var user = _DbConText.Users.FirstOrDefault(x => x.UserName.Contains(name));
+            string res = "";
+            if (user != null)
+            {
+                switch (Add_or_Minus)
+                {
+                    case 0:
+                        res += name + " có " + user.Coin.ToString() + " đã trừ ";
+                        user.Coin -= coin;
+                        _DbConText.Users.Update(user);
+                        _DbConText.SaveChanges();
+                        res += $" {coin} là {name} có {user.Coin} coin";
+                        break;
+                    case 1:
+                        res += name + " có " + user.Coin.ToString() + " đã cộng ";
+                        user.Coin += coin;
+                        _DbConText.Users.Update(user);
+                        _DbConText.SaveChanges();
+                        res += $" {coin} là {name} có {user.Coin} coin";
+                        break;
+                    default:
+                        break;
+                }
+            }
+            if (string.IsNullOrEmpty(res)) { return "khong tim thay tai khoan"; }
+            return res;
+        }
+        #endregion
         public async Task<List<Translate>> Get(SystemManager systemManager)
         {
             var res = _DbConText.Translates.Include(x=>x.User).ThenInclude(x=>x.Address).ToList();
@@ -62,5 +92,11 @@ namespace TranslateAPI.Services
             res += UpdateAddressIP(UnlockOrBock.AddressID, UnlockOrBock.Address, acctive);
             return res;
         }
+
+        public async Task<string> Add_Coin(string name,int coin)
+            => Add_or_Minus_Coin(name, coin, 1);
+
+        public async Task<string> Minus_Coin(string name,int coin)
+            => Add_or_Minus_Coin(name, coin, 0);
     }
 }
