@@ -10,7 +10,7 @@ namespace TranslateAPI.Services
     public class TranslateService :ServiceExtension, ITranslate
     {
         private readonly AppDbContext _DbConText;
-        public TranslateService(AppDbContext DbConText) : base(DbConText) { }
+        public TranslateService(AppDbContext DbConText)  { _DbConText = DbConText; }
         #region private
 
         private string Createhashcode(string text)
@@ -45,7 +45,7 @@ namespace TranslateAPI.Services
                 Input = translate.Input,
                 Result = await Translateapigoole(translate.Inlanguage, translate.OutLanguage, translate.Input),
                 TimeTranslates = DateTime.Now,
-                TranslateCode = Createhashcode($"{userID}+{DateTime.Today.Hour.ToString()}"),
+                TranslateCode = Createhashcode($"{userID.ToString()}+{DateTime.Now.ToString()}"),
             };
         }
         private void UpdateUser(User user,int coin) 
@@ -88,6 +88,7 @@ namespace TranslateAPI.Services
                     UpdateManager(0);
                     break;
                 default:
+                    throw new Exception();
                     break;
             }           
             UpdateAddress(acc.AddressID);

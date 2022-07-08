@@ -10,7 +10,7 @@ namespace TranslateAPI.Services
 
         private readonly AppDbContext _DbConText;
 
-        public UserService(AppDbContext DbConText) : base(DbConText) { }
+        public UserService(AppDbContext DbConText) { _DbConText = DbConText; }
         #region private 
         private Address CreateIP(Manager manager, string IP) 
         {

@@ -21,6 +21,7 @@ builder.Services.AddTransient<ITranslate, TranslateService>();
 builder.Services.AddTransient<IManager, ManagerService>();
 builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddTransient<AppDbContext>();
+builder.Services.AddTransient<ServiceExtension, UserService>();
 
 
 
